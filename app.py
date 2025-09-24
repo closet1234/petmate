@@ -73,13 +73,17 @@ def recommended_food_grams(species:str,weight_kg:float)->tuple:
     return grams,max(0,round(grams*0.1))
 def recommended_water_ml(weight_kg:float)->int:
     return int(round(weight_kg*60)) if weight_kg>0 else 0
-def pet_selector(label="반려동물 선택"):
-    pets=st.session_state.pets
+def pet_selector(label="반려동물 선택", key_suffix=""):
+    """
+    반려동물 선택 Selectbox
+    key_suffix : 탭별로 고유 key 부여 (중복 방지)
+    """
+    pets = st.session_state.pets
     if not pets:
         st.info("먼저 반려동물을 등록해 주세요 (왼쪽 '반려동물 프로필').")
         return None
-    opts={f"{p['name']} ({p['species']})":p for p in pets}
-    return opts[st.selectbox(label,list(opts.keys()))]
+    opts = {f"{p['name']} ({p['species']})": p for p in pets}
+    return opts[st.selectbox(label, list(opts.keys()), key=f"pet_selector_{key_suffix}")]
 
 # ===== 페이지 설정 =====
 st.set_page_config(page_title="PetMate",page_icon="🐾",layout="wide")
@@ -150,7 +154,7 @@ else:
     # ===== 대시보드 =====
     with tab_dash:
         st.header("📊 오늘 한눈에 보기")
-        pet = pet_selector()
+        pet = pet_selector(key_suffix="dash")
         if pet:
             col1,col2,col3 = st.columns(3)
             with col1:
@@ -237,7 +241,7 @@ else:
     # ===== 사료/급수 기록 =====
     with tab_feed:
         st.header("🍽️ 사료/급수 기록")
-        pet = pet_selector()
+        pet = pet_selector(key_suffix="feed")
         if pet:
             with st.form("feed_water_form",clear_on_submit=True):
                 c1,c2 = st.columns(2)
@@ -264,7 +268,7 @@ else:
     # ===== 복약 알림 =====
     with tab_med:
         st.header("💊 복약 스케줄")
-        pet = pet_selector()
+        pet = pet_selector(key_suffix="med")
         if pet:
             st.subheader("새 복약 스케줄 추가")
             with st.form("med_form",clear_on_submit=True):
@@ -308,7 +312,7 @@ else:
     # ===== 병원 일정 =====
     with tab_hosp:
         st.header("🏥 병원 일정 관리")
-        pet = pet_selector()
+        pet = pet_selector(key_suffix="hosp")
         if pet:
             st.subheader("일정 추가")
             with st.form("hosp_form",clear_on_submit=True):
@@ -398,6 +402,7 @@ else:
 # ===== 푸터 =====
 st.divider()
 st.caption("© 2025 PetMate • 학습/포트폴리오용 샘플. 실제 의료 조언은 수의사와 상담하세요.")
+
 
 
 
